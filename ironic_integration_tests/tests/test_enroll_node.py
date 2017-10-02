@@ -29,6 +29,11 @@ class EnrollmentTest(BaseTest):
         uuid = node.get("uuid")
         self.created_resources.append(uuid)
 
+        result = self.cli.execute_cmd("ironic node-show {0}".format(uuid))
+        node = details(result)
+        self.assertEqual(node.get("provision_state"), "available")
+        self.assertEqual(node.get("maintenance"), "False")
+
         result = self.cli.execute_cmd("ironic node-list")
         nodes = listing(result)
         node_listed = False
