@@ -1,5 +1,6 @@
 # Copy of Tempest output parser
-# https://github.com/openstack/tempest/blob/master/tempest/lib/cli/output_parser.py
+# https://github.com/openstack/tempest/blob/master/tempest/
+#   lib/cli/output_parser.py
 
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.

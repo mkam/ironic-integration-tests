@@ -15,7 +15,7 @@ limitations under the License.
 """
 import unittest
 
-from utils.cli_client import CLIClient
+from ironic_integration_tests.common.cli_client import CLIClient
 
 
 class BaseTest(unittest.TestCase):
