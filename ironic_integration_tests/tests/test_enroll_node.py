@@ -14,26 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from ironic_integration_tests.tests.base import BaseTest
-from ironic_integration_tests.common.output_parser import listing, details_multiple
+from ironic_integration_tests.common.output_parser import listing, details
 
 
 class EnrollmentTest(BaseTest):
     def setUp(self):
+        super(EnrollmentTest, self).setUp()
         self.delete_cmd = "ironic node-delete {0}"
 
     def test_single_node_enrollment(self):
         result = self.cli.execute_cmd("ironic node-create -d agent_ipmitool")
-        node = details_multiple(result)
-        print node
+        node = details(result)
+        self.assertEqual(node.get("driver"), "agent_ipmitool")
+        uuid = node.get("uuid")
+        self.created_resources.append(uuid)
+
         result = self.cli.execute_cmd("ironic node-list")
-        table_ = listing(result)
-        print table_
+        nodes = listing(result)
+        node_listed = False
+        for node in nodes:
+            if node.get("UUID") == uuid:
+                node_listed = True
+                break
+        self.assertTrue(node_listed)
 
-
-        result = self.cli.execute_cmd("ironic node-validate")
-        table_ = listing(result)
-        print table_
-        # ironic node-validate
+        result = self.cli.execute_cmd("ironic node-validate {0}".format(uuid))
+        interfaces = listing(result)
+        for interface in interfaces:
+            validate_result = interface.get("Result")
+            self.assertNotEqual(validate_result, "False")
 
     def test_bulk_node_enrollment(self):
         # create file

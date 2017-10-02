@@ -28,10 +28,8 @@ class CLIClient(object):
         if not fail_ok and proc.returncode != 0:
             raise Exception("Command {0} failed: {1}".format(cmd, result_err))
 
-        print proc.returncode
         print result
-        print result_err
-        return result, result_err
+        return result
 
     def wait_for_status(self, cmd, status):
         pass
