@@ -26,7 +26,8 @@ class CLIClient(object):
         result, result_err = proc.communicate()
 
         if not fail_ok and proc.returncode != 0:
-            raise Exception("Command {0} failed: {1}".format(cmd, result_err))
+            raise Exception("Command '{0}' failed: {1}".format(
+                cmd, result_err))
 
         print result
         return result
