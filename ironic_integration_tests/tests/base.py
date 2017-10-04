@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import random
+import string
 import unittest
 
 from ironic_integration_tests.common.cli_client import CLIClient
@@ -25,6 +27,9 @@ class BaseTest(unittest.TestCase):
         self.created_resources = []
         self.delete_cmd = "{0}"
         self.cli = CLIClient()
+
+    def _random_name(self, prefix, length=5):
+        return prefix + "".join(random.sample(string.ascii_letters, length))
 
     def tearDown(self):
         super(BaseTest, self).tearDown()

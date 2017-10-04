@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from ironic_integration_tests.tests.base import BaseTest
-from ironic_integration_tests.common.output_parser import listing, details
+from ironic_integration_tests.common import output_parser as parser
 
 
 class EnrollmentTest(BaseTest):
@@ -24,18 +24,18 @@ class EnrollmentTest(BaseTest):
 
     def test_single_node_enrollment(self):
         result = self.cli.execute_cmd("ironic node-create -d agent_ipmitool")
-        node = details(result)
+        node = parser.details(result)
         self.assertEqual(node.get("driver"), "agent_ipmitool")
         uuid = node.get("uuid")
         self.created_resources.append(uuid)
 
         result = self.cli.execute_cmd("ironic node-show {0}".format(uuid))
-        node = details(result)
+        node = parser.details(result)
         self.assertEqual(node.get("provision_state"), "available")
         self.assertEqual(node.get("maintenance"), "False")
 
         result = self.cli.execute_cmd("ironic node-list")
-        nodes = listing(result)
+        nodes = parser.listing(result)
         node_listed = False
         for node in nodes:
             if node.get("UUID") == uuid:
@@ -44,7 +44,7 @@ class EnrollmentTest(BaseTest):
         self.assertTrue(node_listed)
 
         result = self.cli.execute_cmd("ironic node-validate {0}".format(uuid))
-        interfaces = listing(result)
+        interfaces = parser.listing(result)
         for interface in interfaces:
             validate_result = interface.get("Result")
             self.assertNotEqual(

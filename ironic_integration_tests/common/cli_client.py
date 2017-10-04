@@ -15,6 +15,14 @@ limitations under the License.
 """
 import os
 import subprocess
+import time
+
+from ironic_integration_tests.common import output_parser as parser
+
+
+class CommandFailed(Exception):
+    def __init__(self, message):
+        super(CommandFailed, self).__init__(message)
 
 
 class CLIClient(object):
@@ -26,16 +34,29 @@ class CLIClient(object):
         result, result_err = proc.communicate()
 
         if not fail_ok and proc.returncode != 0:
-            raise Exception("Command '{0}' failed: {1}".format(
+            raise CommandFailed("Command '{0}' failed: {1}".format(
                 cmd, result_err))
 
         print result
         return result
 
-    def wait_for_status(self, cmd, status):
-        pass
+    def wait_for_status(self, cmd, status_key, status_value):
+        result = self.execute_cmd(cmd)
+        resource = parser.details(result)
+        attempts = 0
+        while resource.get(status_key) != status_value and attempts < 10:
+            attempts += 1
+            time.sleep(30)
+            result = self.execute_cmd(cmd)
+            resource = parser.details(result)
+        return resource
 
-    def wait_for_deletion(self):
-        pass
-
-
+    def wait_for_deletion(self, cmd):
+        attempts = 0
+        try:
+            while attempts < 10:
+                self.execute_cmd(cmd)
+                attempts += 1
+                time.sleep(30)
+        except CommandFailed:
+            return
