@@ -43,15 +43,6 @@ class EnrollmentTest(BaseTest):
                 break
         self.assertTrue(node_listed)
 
-        result = self.cli.execute_cmd("ironic node-validate {0}".format(uuid))
-        interfaces = parser.listing(result)
-        for interface in interfaces:
-            validate_result = interface.get("Result")
-            self.assertNotEqual(
-                validate_result, "False",
-                "Validation failed for interface '{0}': {1}".format(
-                    interface.get("Interface"), interface.get("Reason")))
-
     def test_bulk_node_enrollment(self):
         # create file
         # ironic create node.json

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from ironic_integration_tests.tests.base import BaseTest
-from ironic_integration_tests.common.output_parser import listing, details
+from ironic_integration_tests.common import output_parser as parser
 
 
 class InstanceTest(BaseTest):
@@ -24,23 +24,22 @@ class InstanceTest(BaseTest):
 
     def _test_boot_instance(self, image):
         pubkey = self._random_name("testkey")
-        cmd = "ssh-keygen -f /tmp/{0}".format(pubkey)
+        cmd = "ssh-keygen -f /tmp/{0} -N ''".format(pubkey)
         self.execute_cmd(cmd)
 
         cmd = "nova keypair-add --pub-key /tmp/{0}.pub {0}".format(pubkey)
-        result = self.execute_cmd(cmd)
-        # verify created successfully
+        self.execute_cmd(cmd)
 
         name = self._random_name("test_boot_instance")
         cmd = "nova boot --flavor {0} --image {1} --key-name {2} {3}".format(
             "", image, pubkey, name)
         result = self.execute_cmd(cmd)
-        server = details(result)
+        server = parser.details(result)
         uuid = server.get("uuid")
         self.created_resources.append(uuid)
 
-        cmd = "nova show {0}".format(uuid)
-        server = self.wait_for_status(cmd, "status", "ACTIVE")
+        show_cmd = "nova show {0}".format(uuid)
+        server = self.wait_for_status(show_cmd, "status", "ACTIVE")
         self.assertEqual(server.get("status"), "ACTIVE")
         self.assertEqual(server.get("image"), image)
         self.assertEqual(server.get("flavor"), "")
@@ -48,8 +47,8 @@ class InstanceTest(BaseTest):
         # ssh into the instance
         # poke around and verify things
         cmd = "nova delete {0}".format(uuid)
-
-
+        self.execute_cmd(cmd)
+        self.wait_for_deletion(show_cmd)
 
     def test_boot_instance_ubuntu_xenial(self):
         self._test_boot_instance(image="'Ubuntu 16.04 (Xenial)'")
