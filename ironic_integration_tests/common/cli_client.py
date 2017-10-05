@@ -36,6 +36,8 @@ class CLIClient(object):
         if not fail_ok and proc.returncode != 0:
             raise CommandFailed("Command '{0}' failed: {1}".format(
                 cmd, result_err))
+        if fail_ok and proc.returncode != 0:
+            return result_err
 
         print result
         return result
@@ -44,9 +46,9 @@ class CLIClient(object):
         result = self.execute_cmd(cmd)
         resource = parser.details(result)
         attempts = 0
-        while resource.get(status_key) != status_value and attempts < 10:
+        while resource.get(status_key) != status_value and attempts < 20:
             attempts += 1
-            time.sleep(30)
+            time.sleep(15)
             result = self.execute_cmd(cmd)
             resource = parser.details(result)
         return resource
@@ -54,9 +56,9 @@ class CLIClient(object):
     def wait_for_deletion(self, cmd):
         attempts = 0
         try:
-            while attempts < 10:
+            while attempts < 20:
                 self.execute_cmd(cmd)
                 attempts += 1
-                time.sleep(30)
+                time.sleep(15)
         except CommandFailed:
             return

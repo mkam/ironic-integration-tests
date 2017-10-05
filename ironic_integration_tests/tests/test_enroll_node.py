@@ -18,6 +18,7 @@ from ironic_integration_tests.common import output_parser as parser
 
 
 class EnrollmentTest(BaseTest):
+
     def setUp(self):
         super(EnrollmentTest, self).setUp()
         self.delete_cmd = "ironic node-delete {0}"
