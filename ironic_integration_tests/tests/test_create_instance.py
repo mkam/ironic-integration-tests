@@ -29,6 +29,7 @@ class InstanceTest(BaseTest):
 
         cmd = "nova keypair-add --pub-key /tmp/{0}.pub {0}".format(pubkey)
         self.execute_cmd(cmd)
+        self.resource_deletion.append("nova keypair-delete {0}".format(pubkey))
 
         name = self._random_name("test_boot_instance")
         cmd = "nova boot --flavor {0} --image {1} --key-name {2} {3}".format(
@@ -36,7 +37,7 @@ class InstanceTest(BaseTest):
         result = self.execute_cmd(cmd)
         server = parser.details(result)
         uuid = server.get("uuid")
-        self.created_resources.append(uuid)
+        self.resource_deletion.append("nova delete {0}".format(uuid))
 
         show_cmd = "nova show {0}".format(uuid)
         server = self.wait_for_status(show_cmd, "status", "ACTIVE")

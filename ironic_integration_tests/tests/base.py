@@ -24,7 +24,7 @@ class BaseTest(unittest.TestCase):
 
     def setUp(self):
         super(BaseTest, self).setUp()
-        self.created_resources = []
+        self.resource_deletion = []
         self.delete_cmd = "{0}"
         self.cli = CLIClient()
 
@@ -33,6 +33,6 @@ class BaseTest(unittest.TestCase):
 
     def tearDown(self):
         super(BaseTest, self).tearDown()
-        for resource in self.created_resources:
-            self.cli.execute_cmd(cmd=self.delete_cmd.format(resource),
+        for delete_cmd in self.resource_deletion:
+            self.cli.execute_cmd(cmd=delete_cmd,
                                  fail_ok=True)
