@@ -26,6 +26,17 @@ class InstanceTest(BaseTest):
         self.delete_cmd = "nova delete {0}"
 
     def _test_boot_instance(self, image):
+        # Verify image available
+        image_cmd = "glance image-list"
+        result = self.cli.execute_cmd(image_cmd)
+        images = parser.listing(result)
+        image_available = False
+        for available_image in images:
+            if available_image.get("Name") == image:
+                image_available = True
+                break
+        self.assertTrue(image_available)
+
         # Create a key pair
         pubkey = self._random_name("testkey_")
         cmd = "ssh-keygen -f /tmp/{0} -N ''".format(pubkey)
@@ -37,8 +48,8 @@ class InstanceTest(BaseTest):
 
         # Provision the instance
         name = self._random_name("test_boot_instance_")
-        cmd = "nova boot --flavor {0} --image {1} --key-name {2} {3}".format(
-            "", image, pubkey, name)
+        cmd = "nova boot --flavor {0} --image '{1}' --key-name {2} {3}".format(
+            "", image, pubkey, name)  # TODO: set flavor when lab created
         result = self.cli.execute_cmd(cmd)
         server = parser.details(result)
         server_id = server.get("id")
@@ -87,4 +98,13 @@ class InstanceTest(BaseTest):
         self.assertIn("No server with a name or ID of", result)
 
     def test_boot_instance_ubuntu_xenial(self):
-        self._test_boot_instance(image="'Ubuntu 16.04 (Xenial)'")
+        # TODO: update with final image names
+        self._test_boot_instance(image="Ubuntu 16.04 (Xenial)")
+
+    def test_boot_instance_ubuntu_trusty(self):
+        # TODO: update with final image names
+        self._test_boot_instance(image="Ubuntu 14.04 (Trusty)")
+
+    def test_boot_instance_centos7(self):
+        # TODO: update with final image names
+        self._test_boot_instance(image="CentOS 7")
