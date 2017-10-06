@@ -17,8 +17,6 @@ import os
 import subprocess
 import time
 
-from ironic_integration_tests.common import output_parser as parser
-
 
 class CommandFailed(Exception):
     def __init__(self, message):
@@ -56,26 +54,3 @@ class CLIClient(object):
                 attempt += 1
                 time.sleep(delay)
         raise last_exception
-
-    def wait_for_status(self, cmd, status_key, status_value):
-        result = self.execute_cmd(cmd)
-        resource = parser.details(result)
-        attempts = 0
-        while resource.get(status_key) != status_value and attempts < 20:
-            if resource.get(status_key).lower() == "error":
-                return resource
-            attempts += 1
-            time.sleep(15)
-            result = self.execute_cmd(cmd)
-            resource = parser.details(result)
-        return resource
-
-    def wait_for_deletion(self, cmd):
-        attempts = 0
-        try:
-            while attempts < 20:
-                self.execute_cmd(cmd)
-                attempts += 1
-                time.sleep(15)
-        except CommandFailed:
-            return

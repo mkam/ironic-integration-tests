@@ -28,7 +28,7 @@ class EnrollmentTest(BaseTest):
         node = parser.details(result)
         self.assertEqual(node.get("driver"), "agent_ipmitool")
         uuid = node.get("uuid")
-        self.created_resources.append(self.delete_cmd.format(uuid))
+        self.resource_deletion.append(self.delete_cmd.format(uuid))
 
         result = self.cli.execute_cmd("ironic node-show {0}".format(uuid))
         node = parser.details(result)
