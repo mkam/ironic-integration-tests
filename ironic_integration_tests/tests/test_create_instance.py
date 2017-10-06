@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import re
+
 from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
 
@@ -50,8 +52,18 @@ class InstanceTest(BaseTest):
         hypervisor = parser.details(result)
         self.assertEqual(hypervisor.get("hypervisor_type"), "ironic")
 
-        # ssh into the instance
-        # poke around and verify things
+        address_str = server.get("private network")
+        addresses = address_str.split(",")
+        ssh_address = None
+        for address in addresses:
+            if not re.search('[a-z]', address):
+                ssh_address = address.strip()
+        self.assertIsNotNone(ssh_address)
+        ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
+                  "-t cirros@{1} whoami".format(pubkey, ssh_address)
+        result = self.cli.execute_w_retry(ssh_cmd)
+        self.assertIn("cirros", result)
+
         cmd = "nova delete {0}".format(server_id)
         self.cli.execute_cmd(cmd)
         self.cli.wait_for_deletion(show_cmd)

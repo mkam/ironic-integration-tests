@@ -42,11 +42,28 @@ class CLIClient(object):
         print result
         return result
 
+    def execute_w_retry(self, cmd, attempts=20, delay=15):
+        attempt = 1
+        last_exception = None
+        while attempt <= attempts:
+            try:
+                result = self.execute_cmd(cmd)
+                return result
+            except CommandFailed as e:
+                print "Attempt {0} of command failed. Retrying...".format(
+                    attempt)
+                last_exception = e
+                attempt += 1
+                time.sleep(delay)
+        raise last_exception
+
     def wait_for_status(self, cmd, status_key, status_value):
         result = self.execute_cmd(cmd)
         resource = parser.details(result)
         attempts = 0
         while resource.get(status_key) != status_value and attempts < 20:
+            if resource.get(status_key).lower() == "error":
+                return resource
             attempts += 1
             time.sleep(15)
             result = self.execute_cmd(cmd)
