@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import random
+import re
 import string
-import unittest
 import time
+import unittest
 
 from ironic_integration_tests.common import output_parser as parser
 from ironic_integration_tests.common.cli_client import CLIClient, CommandFailed
@@ -44,9 +45,11 @@ class BaseTest(unittest.TestCase):
         self.resource_deletion.append("nova keypair-delete {0}".format(pubkey))
         return pubkey
 
-    def _create_instance(self, image, flavor, pubkey, name):
-        cmd = "nova boot --flavor {0} --image '{1}' --key-name {2} {3}".format(
-            flavor, image, pubkey, name)
+    def _create_instance(self, image, flavor, pubkey, name, network=""):
+        if network != "":
+            network = "--nic net-id={0}".format(network)
+        cmd = "nova boot --flavor {0} --image '{1}' --key-name {2} {3} {4}"\
+            .format(flavor, image, pubkey, name, network)
         result = self.cli.execute_cmd(cmd)
         server = parser.details(result)
         server_id = server.get("id")
@@ -57,6 +60,16 @@ class BaseTest(unittest.TestCase):
         server = self._wait_for_status(show_cmd, "status", "ACTIVE")
         self.assertEqual(server.get("status"), "ACTIVE")
         return server
+
+    def _get_ip_address(self, server):
+        address_str = server.get("private network")
+        addresses = address_str.split(",")
+        ssh_address = None
+        for address in addresses:
+            if not re.search('[a-z]', address):
+                ssh_address = address.strip()
+        self.assertIsNotNone(ssh_address)
+        return ssh_address
 
     def _wait_for_status(self, cmd, status_key, status_value):
         result = self.cli.execute_cmd(cmd)

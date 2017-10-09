@@ -13,16 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import re
-
 from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
 
 
-class InstanceTest(BaseTest):
+class InstanceTests(BaseTest):
 
     def setUp(self):
-        super(InstanceTest, self).setUp()
+        super(InstanceTests, self).setUp()
         self.delete_cmd = "nova delete {0}"
 
     def _test_boot_instance(self, image):
@@ -53,13 +51,7 @@ class InstanceTest(BaseTest):
         self.assertEqual(hypervisor.get("hypervisor_type"), "ironic")
 
         # Verify can ssh into instance
-        address_str = server.get("private network")
-        addresses = address_str.split(",")
-        ssh_address = None
-        for address in addresses:
-            if not re.search('[a-z]', address):
-                ssh_address = address.strip()
-        self.assertIsNotNone(ssh_address)
+        ssh_address = self._get_ip_address(server)
         ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
                   "-t cirros@{1} whoami".format(pubkey, ssh_address)
         result = self.cli.execute_w_retry(ssh_cmd)

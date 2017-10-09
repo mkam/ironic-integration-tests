@@ -17,10 +17,10 @@ from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
 
 
-class EnrollmentTest(BaseTest):
+class EnrollmentTests(BaseTest):
 
     def setUp(self):
-        super(EnrollmentTest, self).setUp()
+        super(EnrollmentTests, self).setUp()
         self.delete_cmd = "ironic node-delete {0}"
 
     def test_single_node_enrollment(self):
