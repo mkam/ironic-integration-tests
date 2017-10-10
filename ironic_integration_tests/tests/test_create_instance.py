@@ -21,7 +21,6 @@ class InstanceTests(BaseTest):
 
     def setUp(self):
         super(InstanceTests, self).setUp()
-        self.delete_cmd = "nova delete {0}"
         self.hv_id = None
 
     def _test_boot_instance(self, image):
@@ -76,16 +75,13 @@ class InstanceTests(BaseTest):
         self.assertIn("No server with a name or ID of", result)
 
     def test_boot_instance_ubuntu_xenial(self):
-        # TODO: update with final image names
-        self._test_boot_instance(image="Ubuntu 16.04 (Xenial)")
+        self._test_boot_instance(image="baremetal-ubuntu-xenial")
 
     def test_boot_instance_ubuntu_trusty(self):
-        # TODO: update with final image names
-        self._test_boot_instance(image="Ubuntu 14.04 (Trusty)")
+        self._test_boot_instance(image="baremetal-ubuntu-trusty")
 
     def test_boot_instance_centos7(self):
-        # TODO: update with final image names
-        self._test_boot_instance(image="CentOS 7")
+        self._test_boot_instance(image="baremetal-centos7-7")
 
     def tearDown(self):
         super(InstanceTests, self).setUp()
