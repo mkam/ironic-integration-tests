@@ -22,6 +22,7 @@ class InstanceTests(BaseTest):
     def setUp(self):
         super(InstanceTests, self).setUp()
         self.delete_cmd = "nova delete {0}"
+        self.hv_id = None
 
     def _test_boot_instance(self, image):
         # Verify image available
@@ -38,14 +39,13 @@ class InstanceTests(BaseTest):
         # Create a server
         pubkey = self._create_keypair()
         name = self._random_name("test_boot_instance_")
-        # TODO: set flavor when lab created
         server = self._create_instance(
-            image=image, flavor="", pubkey=pubkey, name=name)
+            image=image, flavor="baremetal.general", pubkey=pubkey, name=name)
         server_id = server.get("id")
 
         # Verify hypervisor type of instance is ironic
-        hv_id = server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
-        hv_cmd = "nova hypervisor-show {0}".format(hv_id)
+        self.hv_id = server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
+        hv_cmd = "nova hypervisor-show {0}".format(self.hv_id)
         result = self.cli.execute_cmd(hv_cmd)
         hypervisor = parser.details(result)
         self.assertEqual(hypervisor.get("hypervisor_type"), "ironic")
@@ -86,3 +86,10 @@ class InstanceTests(BaseTest):
     def test_boot_instance_centos7(self):
         # TODO: update with final image names
         self._test_boot_instance(image="CentOS 7")
+
+    def tearDown(self):
+        super(InstanceTests, self).setUp()
+        if self.hv_id is not None:
+            # Wait for ironic node to be cleaned and available
+            node_cmd = "ironic node-show {0}".format(self.hv_id)
+            self._wait_for_status(node_cmd, "provision_state", "available")

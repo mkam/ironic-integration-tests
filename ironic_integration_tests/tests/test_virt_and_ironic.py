@@ -35,7 +35,7 @@ class VirtIronicTests(BaseTest):
         pubkey = self._create_keypair()
         ironic_name = self._random_name("test_network_ironic_")
         ironic_server = self._create_instance(
-            image="", flavor="", pubkey=pubkey,
+            image="", flavor="baremetal.general", pubkey=pubkey,
             name=ironic_name, network=net_id)
         ironic_id = ironic_server.get("id")
 
