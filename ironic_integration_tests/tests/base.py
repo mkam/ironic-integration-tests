@@ -62,7 +62,7 @@ class BaseTest(unittest.TestCase):
         return server
 
     def _get_ip_address(self, server):
-        address_str = server.get("private network")
+        address_str = server.get("tftp network")
         addresses = address_str.split(",")
         ssh_address = None
         for address in addresses:
@@ -75,7 +75,7 @@ class BaseTest(unittest.TestCase):
         result = self.cli.execute_cmd(cmd)
         resource = parser.details(result)
         attempts = 0
-        while resource.get(status_key) != status_value and attempts < 20:
+        while resource.get(status_key) != status_value and attempts < 40:
             if resource.get(status_key).lower() == "error":
                 return resource
             attempts += 1
@@ -87,7 +87,7 @@ class BaseTest(unittest.TestCase):
     def _wait_for_deletion(self, cmd):
         attempts = 0
         try:
-            while attempts < 20:
+            while attempts < 40:
                 self.cli.execute_cmd(cmd)
                 attempts += 1
                 time.sleep(15)

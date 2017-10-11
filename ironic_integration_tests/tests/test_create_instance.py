@@ -65,7 +65,7 @@ class InstanceTests(BaseTest):
         server = self._wait_for_status(show_cmd, "status", "ACTIVE")
         self.assertEqual(server.get("status"), "ACTIVE")
         result = self.cli.execute_w_retry(ssh_cmd)
-        self.assertIn("cirros", result)
+        self.assertIn(user, result)
 
         # Delete instance and verify deletion
         cmd = "nova delete {0}".format(server_id)

@@ -40,7 +40,7 @@ class CLIClient(object):
         print result
         return result
 
-    def execute_w_retry(self, cmd, attempts=20, delay=15):
+    def execute_w_retry(self, cmd, attempts=40, delay=15):
         attempt = 1
         last_exception = None
         while attempt <= attempts:
