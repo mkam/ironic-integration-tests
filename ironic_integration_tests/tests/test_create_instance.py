@@ -23,7 +23,7 @@ class InstanceTests(BaseTest):
         super(InstanceTests, self).setUp()
         self.hv_id = None
 
-    def _test_boot_instance(self, image):
+    def _test_boot_instance(self, image, user):
         # Verify image available
         image_cmd = "glance image-list"
         result = self.cli.execute_cmd(image_cmd)
@@ -52,9 +52,9 @@ class InstanceTests(BaseTest):
         # Verify can ssh into instance
         ssh_address = self._get_ip_address(server)
         ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
-                  "-t cirros@{1} whoami".format(pubkey, ssh_address)
+                  "-t {1}@{2} whoami".format(pubkey, user, ssh_address)
         result = self.cli.execute_w_retry(ssh_cmd)
-        self.assertIn("cirros", result)
+        self.assertIn(user, result)
 
         # Perform a server action (reboot) works and verify result
         reboot_cmd = "nova reboot {0}".format(server_id)
@@ -75,16 +75,19 @@ class InstanceTests(BaseTest):
         self.assertIn("No server with a name or ID of", result)
 
     def test_boot_instance_ubuntu_xenial(self):
-        self._test_boot_instance(image="baremetal-ubuntu-xenial")
+        self._test_boot_instance(image="baremetal-ubuntu-xenial",
+                                 user="ubuntu")
 
     def test_boot_instance_ubuntu_trusty(self):
-        self._test_boot_instance(image="baremetal-ubuntu-trusty")
+        self._test_boot_instance(image="baremetal-ubuntu-trusty",
+                                 user="ubuntu")
 
     def test_boot_instance_centos7(self):
-        self._test_boot_instance(image="baremetal-centos7-7")
+        self._test_boot_instance(image="baremetal-centos7-7",
+                                 user="centos")
 
     def tearDown(self):
-        super(InstanceTests, self).setUp()
+        super(InstanceTests, self).tearDown()
         if self.hv_id is not None:
             # Wait for ironic node to be cleaned and available
             node_cmd = "ironic node-show {0}".format(self.hv_id)
