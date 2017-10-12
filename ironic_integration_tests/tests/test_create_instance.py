@@ -54,7 +54,7 @@ class InstanceTests(BaseTest):
         ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
                   "-t {1}@{2} whoami".format(pubkey, user, ssh_address)
         result = self.cli.execute_w_retry(ssh_cmd)
-        self.assertIn(user, result)
+        self.assertEqual(user, result)
 
         # Perform a server action (reboot) works and verify result
         reboot_cmd = "nova reboot {0}".format(server_id)
@@ -64,7 +64,7 @@ class InstanceTests(BaseTest):
         self.assertEqual(server.get("status"), "REBOOT")
         server = self._wait_for_status(show_cmd, "status", "ACTIVE")
         self.assertEqual(server.get("status"), "ACTIVE")
-        result = self.cli.execute_w_retry(ssh_cmd)
+        result = self.cli.execute_w_retry(ssh_cmd, attempts=40, delay=30)
         self.assertIn(user, result)
 
         # Delete instance and verify deletion

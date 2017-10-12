@@ -28,7 +28,6 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         super(BaseTest, self).setUp()
         self.resource_deletion = []
-        self.delete_cmd = "{0}"
         self.cli = CLIClient()
 
     def _random_name(self, prefix, length=5):
