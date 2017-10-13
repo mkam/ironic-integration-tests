@@ -22,28 +22,29 @@ class VirtIronicTests(BaseTest):
         super(VirtIronicTests, self).setUp()
 
     def test_mixed_ironic_and_virt_network(self):
-        net_name = self._random_name("ironic_virt_")
-        net_cmd = "neutron net-create {0}".format(net_name)
-        self.cli.execute_cmd(net_cmd)
-        subnet_cmd = \
-            ("neutron subnet-create --name {0} "
-                "--allocation-pool start=192.168.1.1,end=192.168.63.250  "
-                "--dns-nameserver=4.4.4.4 {0} 192.168.1.0/18").format(net_name)
-        self.cli.execute_cmd(subnet_cmd)
-        net_id = ""
+        # TODO: verify if it is neccessary to create a new network
+        # net_name = self._random_name("ironic_virt_")
+        # net_cmd = "neutron net-create {0}".format(net_name)
+        # self.cli.execute_cmd(net_cmd)
+        # subnet_cmd = \
+        #     ("neutron subnet-create --name {0} "
+        #         "--allocation-pool start=192.168.1.1,end=192.168.63.250  "
+        #         "--dns-nameserver=4.4.4.4 {0} 192.168.1.0/18").format(net_name)
+        # self.cli.execute_cmd(subnet_cmd)
 
+        net_cmd = "neutron net-show tftp"
+        tftp_network = self.cli.execute_cmd(net_cmd)
+        net_id = tftp_network.get("id")
         pubkey = self._create_keypair()
         ironic_name = self._random_name("test_network_ironic_")
         ironic_server = self._create_instance(
-            image="", flavor="baremetal.general", pubkey=pubkey,
-            name=ironic_name, network=net_id)
-        ironic_id = ironic_server.get("id")
+            image="baremetal-ubuntu-trusty", flavor="baremetal.general",
+            pubkey=pubkey, name=ironic_name, network=net_id)
 
         virt_name = self._random_name("test_network_virt_")
         virt_server = self._create_instance(
-            image="", flavor="", pubkey=pubkey,
-            name=ironic_name, network=net_id)
-        virt_id = virt_server.get("id")
+            image="cirros", flavor="tempest1", pubkey=pubkey,
+            name=virt_name, network=net_id)
 
         ironic_ip = self._get_ip_address(ironic_server)
         virt_ip = self._get_ip_address(virt_server)
