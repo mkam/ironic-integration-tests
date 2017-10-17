@@ -28,6 +28,7 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         super(BaseTest, self).setUp()
         self.resource_deletion = []
+        self.hv_id = None
         self.cli = CLIClient()
 
     def _random_name(self, prefix, length=5):
@@ -98,3 +99,7 @@ class BaseTest(unittest.TestCase):
         for delete_cmd in self.resource_deletion:
             self.cli.execute_cmd(cmd=delete_cmd,
                                  fail_ok=True)
+        if self.hv_id is not None:
+            # Wait for ironic node to be cleaned and available
+            node_cmd = "ironic node-show {0}".format(self.hv_id)
+            self._wait_for_status(node_cmd, "provision_state", "available")

@@ -31,6 +31,7 @@ class VirtIronicTests(BaseTest):
         ironic_server = self._create_instance(
             image="baremetal-ubuntu-trusty", flavor="baremetal.general",
             pubkey=pubkey, name=ironic_name, network=net_id)
+        self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
 
         virt_name = self._random_name("test_network_virt_")
         virt_server = self._create_instance(
@@ -102,6 +103,7 @@ class VirtIronicTests(BaseTest):
         ironic_server = self._create_instance(
             image="baremetal-ubuntu-trusty", flavor="baremetal.general",
             pubkey=pubkey, name=ironic_name)
+        self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
 
         available_virt = None
         for virt_host in virtual_hosts:

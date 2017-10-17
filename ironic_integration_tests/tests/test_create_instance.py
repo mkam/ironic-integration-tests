@@ -21,7 +21,6 @@ class InstanceTests(BaseTest):
 
     def setUp(self):
         super(InstanceTests, self).setUp()
-        self.hv_id = None
 
     def _test_boot_instance(self, image, user):
         # Verify image available
@@ -88,7 +87,3 @@ class InstanceTests(BaseTest):
 
     def tearDown(self):
         super(InstanceTests, self).tearDown()
-        if self.hv_id is not None:
-            # Wait for ironic node to be cleaned and available
-            node_cmd = "ironic node-show {0}".format(self.hv_id)
-            self._wait_for_status(node_cmd, "provision_state", "available")
