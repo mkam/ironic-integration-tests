@@ -53,7 +53,7 @@ class InstanceTests(BaseTest):
         ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
                   "-t {1}@{2} whoami".format(pubkey, user, ssh_address)
         result = self.cli.execute_w_retry(ssh_cmd)
-        self.assertEqual(user, result)
+        self.assertIn(user, result)
 
         # Perform a server action (reboot) works and verify result
         reboot_cmd = "nova reboot {0}".format(server_id)
