@@ -1,0 +1,55 @@
+{
+  "nodes": [
+    {
+      "name": "dell-node",
+      "driver": "agent_ipmitool",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "cpus": 12,
+        "capabilities": "boot_option:local,disk_label:gpt",
+        "memory_mb": 254802,
+        "local_gb": 40,
+        "size": 3600
+      },
+      "driver_info": {
+        "ipmi_address": "172.18.4.102",
+        "ipmi_password": "{{ ipmi_password }}",
+        "ipmi_username": "root",
+        "deploy_ramdisk": "{{ deploy_ramdisk }}",
+        "deploy_kernel": "{{ deploy_kernel }}"
+      },
+      "resource_class": "baremetal.general",
+      "ports": [
+        {
+          "address": "a0:36:9f:b9:64:00"
+        }
+      ]
+
+    },
+    {
+      "name": "hp-node",
+      "driver": "agent_ipmitool",
+      "properties": {
+        "cpu_arch": "x86_64",
+        "cpus": 12,
+        "capabilities": "boot_option:local,disk_label:gpt",
+        "memory_mb": 254802,
+        "local_gb": 40,
+        "size": 3600
+      },
+      "driver_info": {
+        "ipmi_address": "172.18.4.102",
+        "ipmi_password": "{{ ipmi_password }}",
+        "ipmi_username": "root",
+        "deploy_ramdisk": "{{ deploy_ramdisk }}",
+        "deploy_kernel": "{{ deploy_kernel }}"
+      },
+      "resource_class": "baremetal.general",
+      "ports": [
+        {
+          "address": "a0:36:9f:ba:a1:ea"
+        }
+      ]
+    }
+  ]
+}

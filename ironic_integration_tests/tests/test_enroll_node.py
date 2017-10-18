@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import os
+
 from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
 
@@ -45,7 +47,23 @@ class EnrollmentTests(BaseTest):
         self.assertTrue(node_listed)
 
     def test_bulk_node_enrollment(self):
-        # create file
-        # ironic create node.json
         # https://docs.openstack.org/python-ironicclient/latest/user/create_command.html
-        pass
+        ipmi_password = os.environ.get("ipmi_password")
+        cmd = "glance image-list | awk '/ironic-deploy.initramfs/ {print $2}'"
+        ramdisk = self.cli.execute_cmd(cmd)
+        cmd = "glance image-list | awk '/ironic-deploy.kernel/ {print $2}')"
+        kernel = self.cli.execute_cmd(cmd)
+
+        # TODO: create file from template?
+
+        cmd = "ironic --ironic-api-version 1.22 create node.json"
+        self.cli.execute_cmd(cmd)
+        cmd = "ironic node-list"
+        result = self.cli.execute_cmd(cmd)
+        nodes = parser.listing(result)
+
+        # verify the nodes are in list
+        # verify nodes created with proper values
+        # ironic --ironic-api-version 1.22 node-set-provision-state "${NODE_UUID}" manage
+        # sleep 1m  # necessary to get power state
+        # ironic --ironic-api-version 1.22 node-set-provision-state "${NODE_UUID}" provide
