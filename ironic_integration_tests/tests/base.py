@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import os
 import random
 import re
 import string
@@ -99,10 +100,11 @@ class BaseTest(unittest.TestCase):
 
     def tearDown(self):
         super(BaseTest, self).tearDown()
-        for delete_cmd in self.resource_deletion:
-            self.cli.execute_cmd(cmd=delete_cmd,
-                                 fail_ok=True)
-        if self.hv_id is not None:
-            # Wait for ironic node to be cleaned and available
-            node_cmd = "ironic node-show {0}".format(self.hv_id)
-            self._wait_for_status(node_cmd, "provision_state", "available")
+        if os.environ.get("SKIP_CLEANUP", "").lower() != "true":
+            for delete_cmd in self.resource_deletion:
+                self.cli.execute_cmd(cmd=delete_cmd,
+                                     fail_ok=True)
+            if self.hv_id is not None:
+                # Wait for ironic node to be cleaned and available
+                node_cmd = "ironic node-show {0}".format(self.hv_id)
+                self._wait_for_status(node_cmd, "provision_state", "available")

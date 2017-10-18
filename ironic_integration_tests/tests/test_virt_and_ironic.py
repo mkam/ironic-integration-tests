@@ -45,14 +45,14 @@ class VirtIronicTests(BaseTest):
         # Wait for virtual server to go to ACTIVE
         server_id = virt_server.get("id")
         show_cmd = "nova show {0}".format(server_id)
-        server = self._wait_for_status(show_cmd, "status", "ACTIVE")
-        self.assertEqual(server.get("status"), "ACTIVE")
+        virt_server = self._wait_for_status(show_cmd, "status", "ACTIVE")
+        self.assertEqual(virt_server.get("status"), "ACTIVE")
 
         # Wait for ironic server to go to ACTIVE
         server_id = ironic_server.get("id")
         show_cmd = "nova show {0}".format(server_id)
-        server = self._wait_for_status(show_cmd, "status", "ACTIVE")
-        self.assertEqual(server.get("status"), "ACTIVE")
+        ironic_server = self._wait_for_status(show_cmd, "status", "ACTIVE")
+        self.assertEqual(ironic_server.get("status"), "ACTIVE")
         self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
 
         # Log onto each server and ping the other server

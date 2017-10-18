@@ -38,3 +38,5 @@ $ source ~/openrc
 $ source /openstack/venvs/tempest-*/bin/activate
 $ nosetests -sv ironic_integration_tests.tests.test_create_instance.py:InstanceTests.test_boot_instance_centos7
 ```
+
+To create logs, run `nosetests -sv --nologcapture`. To run without cleanup, use `export SKIP_CLEANUP=true`.
