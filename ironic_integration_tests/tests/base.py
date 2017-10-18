@@ -45,7 +45,8 @@ class BaseTest(unittest.TestCase):
         self.resource_deletion.append("nova keypair-delete {0}".format(pubkey))
         return pubkey
 
-    def _create_instance(self, image, flavor, pubkey, name, network=""):
+    def _create_instance(self, image, flavor, pubkey, name, network="",
+                         wait_for_active=True):
         if network != "":
             network = "--nic net-id={0}".format(network)
         cmd = "nova boot --flavor {0} --image '{1}' --key-name {2} " \
@@ -58,8 +59,9 @@ class BaseTest(unittest.TestCase):
 
         # Wait for instance to go to ACTIVE
         show_cmd = "nova show {0}".format(server_id)
-        server = self._wait_for_status(show_cmd, "status", "ACTIVE")
-        self.assertEqual(server.get("status"), "ACTIVE")
+        if wait_for_active:
+            server = self._wait_for_status(show_cmd, "status", "ACTIVE")
+            self.assertEqual(server.get("status"), "ACTIVE")
         return server
 
     def _get_ip_address(self, server):

@@ -23,21 +23,39 @@ class VirtIronicTests(BaseTest):
         super(VirtIronicTests, self).setUp()
 
     def test_mixed_ironic_and_virt_network(self):
+        # Get tftp private network ID
         net_cmd = "neutron net-show tftp"
-        tftp_network = self.cli.execute_cmd(net_cmd)
+        result = self.cli.execute_cmd(net_cmd)
+        tftp_network = parser.details(result)
         net_id = tftp_network.get("id")
+
+        # Create a ironic server and a virtual server
         pubkey = self._create_keypair()
         ironic_name = self._random_name("test_network_ironic_")
         ironic_server = self._create_instance(
             image="baremetal-ubuntu-trusty", flavor="baremetal.general",
-            pubkey=pubkey, name=ironic_name, network=net_id)
-        self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
+            pubkey=pubkey, name=ironic_name, network=net_id,
+            wait_for_active=False)
 
         virt_name = self._random_name("test_network_virt_")
         virt_server = self._create_instance(
             image="cirros", flavor="tempest1", pubkey=pubkey,
-            name=virt_name, network=net_id)
+            name=virt_name, network=net_id, wait_for_active=False)
 
+        # Wait for virtual server to go to ACTIVE
+        server_id = virt_server.get("id")
+        show_cmd = "nova show {0}".format(server_id)
+        server = self._wait_for_status(show_cmd, "status", "ACTIVE")
+        self.assertEqual(server.get("status"), "ACTIVE")
+
+        # Wait for ironic server to go to ACTIVE
+        server_id = ironic_server.get("id")
+        show_cmd = "nova show {0}".format(server_id)
+        server = self._wait_for_status(show_cmd, "status", "ACTIVE")
+        self.assertEqual(server.get("status"), "ACTIVE")
+        self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
+
+        # Log onto each server and ping the other server
         ironic_ip = self._get_ip_address(ironic_server)
         virt_ip = self._get_ip_address(virt_server)
 

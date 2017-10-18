@@ -37,9 +37,10 @@ def details_multiple(output_lines, with_label=False):
     items = []
     tables_ = tables(output_lines)
     for table_ in tables_:
-        if ('Property' not in table_['headers']
+        if (('Property' not in table_['headers']
+             and 'Field' not in table_['headers'])
                 or 'Value' not in table_['headers']):
-            raise Exception
+            raise Exception("Invalid structure of table with details")
         item = {}
         for value in table_['values']:
             item[value[0]] = value[1]
