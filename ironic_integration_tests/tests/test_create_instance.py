@@ -32,7 +32,8 @@ class InstanceTests(BaseTest):
             if available_image.get("Name") == image:
                 image_available = True
                 break
-        self.assertTrue(image_available)
+        self.assertTrue(image_available,
+                        "Image {0} not found in glance".format(image))
 
         # Create a server
         pubkey = self._create_keypair()
@@ -46,7 +47,8 @@ class InstanceTests(BaseTest):
         hv_cmd = "nova hypervisor-show {0}".format(self.hv_id)
         result = self.cli.execute_cmd(hv_cmd)
         hypervisor = parser.details(result)
-        self.assertEqual(hypervisor.get("hypervisor_type"), "ironic")
+        self.assertEqual(hypervisor.get("hypervisor_type"), "ironic",
+                         "Instance not booted on ironic node")
 
         # Verify can ssh into instance
         ssh_address = self._get_ip_address(server)

@@ -71,26 +71,26 @@ class VirtIronicTests(BaseTest):
 
     def test_ironic_virt_region(self):
         region_cmd = "openstack region list"
-        result = self.cli.cmd(region_cmd)
+        result = self.cli.execute_cmd(region_cmd)
         regions = parser.listing(result)
-        self.assertEqual(len(regions), 1)
+        self.assertEqual(len(regions), 1, "Multiple regions deployed")
 
         ironic_hosts = []
         virtual_hosts = []
         cmd = "nova hypervisor-list"
-        result = self.cli.cmd(cmd)
+        result = self.cli.execute_cmd(cmd)
         hypervisors = parser.listing(result)
         for hv in hypervisors:
             cmd = "nova hypervisor-show {0}".format(
                 hv.get("Hypervisor hostname"))
-            result = self.cli.cmd(cmd)
+            result = self.cli.execute_cmd(cmd)
             hypervisor = parser.details(result)
             if hypervisor.get("hypervisor_type") == "ironic":
                 ironic_hosts.append(hv.get("service_host"))
             else:
                 virtual_hosts.append(hv.get("service_host"))
-        self.assertGreater(len(ironic_hosts), 0)
-        self.assertGreater(len(virtual_hosts), 0)
+        self.assertGreater(len(ironic_hosts), 0, "No ironic hosts found")
+        self.assertGreater(len(virtual_hosts), 0, "No virtual hosts found")
 
         pubkey = self._create_keypair()
         virt_name = self._random_name("test_region_virt_")
@@ -101,7 +101,7 @@ class VirtIronicTests(BaseTest):
         available_ironic = None
         for ironic_host in ironic_hosts:
             cmd = "openstack host show {0}".format(ironic_host)
-            result = self.cli.cmd(cmd)
+            result = self.cli.execute_cmd(cmd)
             projects = parser.listing(result)
             for project in projects:
                 if (project.get("Project") == "total"
@@ -126,7 +126,7 @@ class VirtIronicTests(BaseTest):
         available_virt = None
         for virt_host in virtual_hosts:
             cmd = "openstack host show {0}".format(virt_host)
-            result = self.cli.cmd(cmd)
+            result = self.cli.execute_cmd(cmd)
             projects = parser.listing(result)
             for project in projects:
                 if (project.get("Project") == "total"
