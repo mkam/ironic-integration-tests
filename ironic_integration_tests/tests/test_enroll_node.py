@@ -15,6 +15,8 @@ limitations under the License.
 """
 import os
 
+from jinja2 import Environment, PackageLoader
+
 from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
 
@@ -47,16 +49,22 @@ class EnrollmentTests(BaseTest):
         self.assertTrue(node_listed)
 
     def test_bulk_node_enrollment(self):
-        # https://docs.openstack.org/python-ironicclient/latest/user/create_command.html
         ipmi_password = os.environ.get("ipmi_password")
         cmd = "glance image-list | awk '/ironic-deploy.initramfs/ {print $2}'"
         ramdisk = self.cli.execute_cmd(cmd)
         cmd = "glance image-list | awk '/ironic-deploy.kernel/ {print $2}')"
         kernel = self.cli.execute_cmd(cmd)
 
-        # TODO: create file from template?
+        env = Environment(
+            loader=PackageLoader('ironic_integration_tests', 'templates'))
+        template = env.get_template('nodes.json.j2')
+        template_rendered = template.render(
+            ipmi_password=ipmi_password, deploy_ramdisk=ramdisk,
+            deploy_kernel=kernel)
+        f = open('nodes.json', 'w')
+        f.write(template_rendered)
 
-        cmd = "ironic --ironic-api-version 1.22 create node.json"
+        cmd = "ironic --ironic-api-version 1.22 create nodes.json"
         self.cli.execute_cmd(cmd)
         cmd = "ironic node-list"
         result = self.cli.execute_cmd(cmd)
