@@ -2,6 +2,12 @@
 This repository contains integration tests designed to run in a lab environment.
 
 ## Prerequisites
+The python package requirements for running tests can be installed with:
+
+```
+pip install -r requirements.txt
+```
+
 Each test has different prerequisites, but in general, the lab environment should
  have the following:
  
