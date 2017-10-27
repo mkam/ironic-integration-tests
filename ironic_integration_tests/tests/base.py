@@ -50,6 +50,14 @@ class BaseTest(unittest.TestCase):
                          wait_for_active=True):
         if network != "":
             network = "--nic net-id={0}".format(network)
+        else:
+            # Get tftp private network ID
+            net_cmd = "neutron net-show tftp"
+            result = self.cli.execute_cmd(net_cmd)
+            tftp_network = parser.details(result)
+            net_id = tftp_network.get("id")
+            network = "--nic net-id={0}".format(net_id)
+
         cmd = "nova boot --flavor {0} --image '{1}' --key-name {2} " \
               "--security-group rpc-support,default {3} {4}"\
             .format(flavor, image, pubkey, network, name)
