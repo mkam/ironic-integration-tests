@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import os
+import time
 
 from jinja2 import Environment, PackageLoader
 
@@ -49,12 +50,16 @@ class EnrollmentTests(BaseTest):
         self.assertTrue(node_listed)
 
     def test_bulk_node_enrollment(self):
+        # Set dynamic variables of nodes
+        dell_name = self._random_name("dell_")
+        hp_name = self._random_name("hp_")
         ipmi_password = os.environ.get("ipmi_password")
         cmd = "glance image-list | awk '/ironic-deploy.initramfs/ {print $2}'"
         ramdisk = self.cli.execute_cmd(cmd)
         cmd = "glance image-list | awk '/ironic-deploy.kernel/ {print $2}')"
         kernel = self.cli.execute_cmd(cmd)
 
+        # Create the nodes JSON file
         env = Environment(
             loader=PackageLoader('ironic_integration_tests', 'templates'))
         template = env.get_template('nodes.json.j2')
@@ -64,14 +69,50 @@ class EnrollmentTests(BaseTest):
         f = open('nodes.json', 'w')
         f.write(template_rendered)
 
+        # Create the nodes
         cmd = "ironic --ironic-api-version 1.22 create nodes.json"
         self.cli.execute_cmd(cmd)
         cmd = "ironic node-list"
         result = self.cli.execute_cmd(cmd)
         nodes = parser.listing(result)
+        self.assertGreaterEqual(len(nodes), 2, "Nodes not created")
 
-        # verify the nodes are in list
-        # verify nodes created with proper values
-        # ironic --ironic-api-version 1.22 node-set-provision-state "${NODE_UUID}" manage
-        # sleep 1m  # necessary to get power state
-        # ironic --ironic-api-version 1.22 node-set-provision-state "${NODE_UUID}" provide
+        # Verify node properties
+        cmd = "ironic node-show {0}".format(dell_name)
+        result = self.cli.execute_cmd(cmd)
+        dell_node = parser.details(result)
+        # check some values
+        cmd = "ironic node-show {0}".format(hp_name)
+        result = self.cli.execute_cmd(cmd)
+        hp_node = parser.details(result)
+        # check some values
+
+        # Set provision states
+        cmd = 'ironic --ironic-api-version 1.22 node-set-provision-state ' \
+              '"{0}" manage'.format(dell_name)
+        self.cli.execute_cmd(cmd)
+        cmd = 'ironic --ironic-api-version 1.22 node-set-provision-state ' \
+              '"{0}" manage'.format(hp_name)
+        self.cli.execute_cmd(cmd)
+
+        time.sleep(60)
+
+        cmd = 'ironic --ironic-api-version 1.22 node-set-provision-state ' \
+              '"{0}" provide'.format(dell_name)
+        self.cli.execute_cmd(cmd)
+        cmd = 'ironic --ironic-api-version 1.22 node-set-provision-state ' \
+              '"{0}" provide'.format(hp_name)
+        self.cli.execute_cmd(cmd)
+
+        # Verify states of nodes
+        cmd = "ironic node-show {0}".format(dell_name)
+        result = self.cli.execute_cmd(cmd)
+        dell_node = parser.details(result)
+        self.assertEqual(dell_node.get("provision_state"), "available")
+        self.assertEqual(dell_node.get("maintenance"), "False")
+
+        cmd = "ironic node-show {0}".format(hp_name)
+        result = self.cli.execute_cmd(cmd)
+        hp_node = parser.details(result)
+        self.assertEqual(hp_node.get("provision_state"), "available")
+        self.assertEqual(hp_node.get("maintenance"), "False")

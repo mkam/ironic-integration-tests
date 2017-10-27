@@ -1,7 +1,7 @@
 {
   "nodes": [
     {
-      "name": "dell-node",
+      "name": "{{ dell_name }}",
       "driver": "agent_ipmitool",
       "properties": {
         "cpu_arch": "x86_64",
@@ -27,7 +27,7 @@
 
     },
     {
-      "name": "hp-node",
+      "name": "{{ hp_name }}",
       "driver": "agent_ipmitool",
       "properties": {
         "cpu_arch": "x86_64",
