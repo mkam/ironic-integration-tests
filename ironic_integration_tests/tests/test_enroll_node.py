@@ -53,7 +53,8 @@ class EnrollmentTests(BaseTest):
         # Set dynamic variables of nodes
         dell_name = self._random_name("dell_")
         hp_name = self._random_name("hp_")
-        ipmi_password = os.environ.get("ipmi_password")
+        dell_ipmi_password = os.environ.get("hp_ipmi_password")
+        hp_ipmi_password = os.environ.get("dell_ipmi_password")
         cmd = "glance image-list | awk '/ironic-deploy.initramfs/ {print $2}'"
         ramdisk = self.cli.execute_cmd(cmd)
         cmd = "glance image-list | awk '/ironic-deploy.kernel/ {print $2}')"
@@ -64,7 +65,11 @@ class EnrollmentTests(BaseTest):
             loader=PackageLoader('ironic_integration_tests', 'templates'))
         template = env.get_template('nodes.json.j2')
         template_rendered = template.render(
-            ipmi_password=ipmi_password, deploy_ramdisk=ramdisk,
+            dell_name=dell_name,
+            dell_ipmi_password=dell_ipmi_password,
+            hp_name=hp_name,
+            hp_ipmi_password=hp_ipmi_password,
+            deploy_ramdisk=ramdisk,
             deploy_kernel=kernel)
         f = open('nodes.json', 'w')
         f.write(template_rendered)
