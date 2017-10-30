@@ -15,6 +15,7 @@ limitations under the License.
 """
 from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
+from ironic_integration_tests.common.config import get_config
 
 
 class VirtIronicTests(BaseTest):
@@ -33,14 +34,17 @@ class VirtIronicTests(BaseTest):
         pubkey = self._create_keypair()
         ironic_name = self._random_name("test_network_ironic_")
         ironic_server = self._create_instance(
-            image="baremetal-ubuntu-trusty", flavor="baremetal.general",
+            image=get_config("ironic", "image"),
+            flavor=get_config("ironic", "flavor"),
             pubkey=pubkey, name=ironic_name, network=net_id,
             wait_for_active=False)
 
         virt_name = self._random_name("test_network_virt_")
         virt_server = self._create_instance(
-            image="cirros", flavor="tempest1", pubkey=pubkey,
-            name=virt_name, network=net_id, wait_for_active=False)
+            image=get_config("virt", "image"),
+            flavor=get_config("virt", "flavor"),
+            pubkey=pubkey, name=virt_name, network=net_id,
+            wait_for_active=False)
 
         # Wait for virtual server to go to ACTIVE
         server_id = virt_server.get("id")
@@ -59,14 +63,16 @@ class VirtIronicTests(BaseTest):
         ironic_ip = self._get_ip_address(ironic_server)
         virt_ip = self._get_ip_address(virt_server)
 
+        user = get_config("ironic", "user")
         ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
-                  "-t ubuntu@{1} ping {2} -c 5".format(
-                    pubkey, ironic_ip, virt_ip)
+                  "-t {1}@{2} ping {3} -c 5".format(
+                    pubkey, user, ironic_ip, virt_ip)
         self.cli.execute_w_retry(ssh_cmd)
 
+        user = get_config("virt", "user")
         ssh_cmd = "ssh -o StrictHostKeyChecking=no -i /tmp/{0} " \
-                  "-t cirros@{1} ping {2} -c 5".format(
-                    pubkey, virt_ip, ironic_ip)
+                  "-t {1}@{2} ping {3} -c 5".format(
+                    pubkey, user, virt_ip, ironic_ip)
         self.cli.execute_w_retry(ssh_cmd)
 
     def test_ironic_virt_region(self):
@@ -95,8 +101,9 @@ class VirtIronicTests(BaseTest):
         pubkey = self._create_keypair()
         virt_name = self._random_name("test_region_virt_")
         virt_server = self._create_instance(
-            image="cirros", flavor="tempest1", pubkey=pubkey,
-            name=virt_name)
+            image=get_config("virt", "image"),
+            flavor=get_config("virt", "flavor"),
+            pubkey=pubkey, name=virt_name)
 
         available_ironic = None
         for ironic_host in ironic_hosts:
@@ -119,7 +126,8 @@ class VirtIronicTests(BaseTest):
 
         ironic_name = self._random_name("test_region_ironic_")
         ironic_server = self._create_instance(
-            image="baremetal-ubuntu-trusty", flavor="baremetal.general",
+            image=get_config("ironic", "image"),
+            flavor=get_config("ironic", "flavor"),
             pubkey=pubkey, name=ironic_name)
         self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
 

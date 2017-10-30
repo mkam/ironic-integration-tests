@@ -13,13 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import os
 import time
 
 from jinja2 import Environment, PackageLoader
 
 from ironic_integration_tests.tests.base import BaseTest
 from ironic_integration_tests.common import output_parser as parser
+from ironic_integration_tests.common.config import get_config
 
 
 class EnrollmentTests(BaseTest):
@@ -53,8 +53,8 @@ class EnrollmentTests(BaseTest):
         # Set dynamic variables of nodes
         dell_name = self._random_name("dell_")
         hp_name = self._random_name("hp_")
-        dell_ipmi_password = os.environ.get("hp_ipmi_password")
-        hp_ipmi_password = os.environ.get("dell_ipmi_password")
+        dell_ipmi_password = get_config("ironic", "dell_ipmi_password")
+        hp_ipmi_password = get_config("ironic", "hp_ipmi_password")
         cmd = "glance image-list | awk '/ironic-deploy.initramfs/ {print $2}'"
         ramdisk = self.cli.execute_cmd(cmd)
         cmd = "glance image-list | awk '/ironic-deploy.kernel/ {print $2}')"
