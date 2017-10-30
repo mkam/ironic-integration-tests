@@ -19,7 +19,7 @@ from ConfigParser import SafeConfigParser
 
 config = SafeConfigParser()
 dir = os.path.dirname(__file__)
-cfg_path = os.path.join(dir, "../../ironic_tests.conf")
+cfg_path = os.path.join(dir, "../../lab.conf")
 config.read(cfg_path)
 
 
