@@ -111,8 +111,8 @@ class VirtIronicTests(BaseTest):
             result = self.cli.execute_cmd(cmd)
             projects = parser.listing(result)
             for project in projects:
-                if (project.get("Project") == "total"
-                        and project.get("Memory MB") > 254802):
+                if (project.get("Project") == "(total)"
+                        and project.get("Memory MB") > 256):
                     available_ironic = ironic_host
                     break
             if available_ironic is not None:
@@ -139,8 +139,8 @@ class VirtIronicTests(BaseTest):
             result = self.cli.execute_cmd(cmd)
             projects = parser.listing(result)
             for project in projects:
-                if (project.get("Project") == "total"
-                        and project.get("Memory MB") > 256):
+                if (project.get("Project") == "(total)"
+                        and project.get("Memory MB") > 254802):
                     available_virt = virt_host
                     break
             if available_virt is not None:
