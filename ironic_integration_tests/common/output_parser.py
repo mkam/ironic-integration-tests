@@ -42,8 +42,12 @@ def details_multiple(output_lines, with_label=False):
                 or 'Value' not in table_['headers']):
             raise Exception("Invalid structure of table with details")
         item = {}
+        last_value = None
         for value in table_['values']:
             item[value[0]] = value[1]
+            if value[0] == '':
+                item[last_value] = item[last_value] + value[1]
+            last_value = value[0]
         if with_label:
             item['__label'] = table_['label']
         items.append(item)

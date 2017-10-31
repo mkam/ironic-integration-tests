@@ -92,9 +92,9 @@ class VirtIronicTests(BaseTest):
             result = self.cli.execute_cmd(cmd)
             hypervisor = parser.details(result)
             if hypervisor.get("hypervisor_type") == "ironic":
-                ironic_hosts.append(hv.get("service_host"))
+                ironic_hosts.append(hypervisor.get("service_host"))
             else:
-                virtual_hosts.append(hv.get("service_host"))
+                virtual_hosts.append(hypervisor.get("service_host"))
         self.assertGreater(len(ironic_hosts), 0, "No ironic hosts found")
         self.assertGreater(len(virtual_hosts), 0, "No virtual hosts found")
 
@@ -118,6 +118,8 @@ class VirtIronicTests(BaseTest):
             if available_ironic is not None:
                 break
 
+        self.assertIsNotNone(
+            available_ironic, "No available ironic host to attempt to migrate")
         migrate_cmd = "openstack server migrate {0} --live {1}"
         virt_to_ironic = migrate_cmd.format(virt_server.get("id"),
                                             available_ironic)
@@ -144,6 +146,8 @@ class VirtIronicTests(BaseTest):
             if available_virt is not None:
                 break
 
+        self.assertIsNotNone(
+            available_virt, "No available virtual host to attempt to migrate")
         ironic_to_virt = migrate_cmd.format(ironic_server.get("id"),
                                             available_virt)
         result = self.cli.execute_cmd(cmd=ironic_to_virt, fail_ok=True)
