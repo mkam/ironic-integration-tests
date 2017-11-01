@@ -134,6 +134,8 @@ class VirtIronicTests(BaseTest):
                                             available_ironic)
         result = self.cli.execute_cmd(cmd=virt_to_ironic, fail_ok=True)
         self.assertIn("The supplied hypervisor type of is invalid", result)
+        cmd = "nova delete {0}".format(virt_name)
+        self.cli.execute_cmd(cmd, fail_ok=True)
 
         ironic_name = self._random_name("test_region_ironic_")
         ironic_server = self._create_instance(
