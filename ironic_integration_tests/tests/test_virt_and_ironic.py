@@ -105,17 +105,26 @@ class VirtIronicTests(BaseTest):
             flavor=get_config("virt", "flavor"),
             pubkey=pubkey, name=virt_name)
 
+        cmd = "nova flavor-show {0}".format(get_config("virt", "flavor"))
+        result = self.cli.execute_cmd(cmd)
+        flavor = parser.details(result)
+        virt_ram = flavor.get("ram")
+
         available_ironic = None
         for ironic_host in ironic_hosts:
             cmd = "openstack host show {0}".format(ironic_host)
             result = self.cli.execute_cmd(cmd)
             projects = parser.listing(result)
+            total = 0
+            used = 0
             for project in projects:
-                if (project.get("Project") == "(total)"
-                        and project.get("Memory MB") > 256):
-                    available_ironic = ironic_host
-                    break
-            if available_ironic is not None:
+                if project.get("Project") == "(total)":
+                    total = project.get("Memory MB")
+                if project.get("Project") == "(used_now)":
+                    used = project.get("Memory MB")
+            available_ram = int(total) - int(used)
+            if available_ram >= virt_ram:
+                available_ironic = ironic_host
                 break
 
         self.assertIsNotNone(
@@ -133,17 +142,26 @@ class VirtIronicTests(BaseTest):
             pubkey=pubkey, name=ironic_name)
         self.hv_id = ironic_server.get("OS-EXT-SRV-ATTR:hypervisor_hostname")
 
+        cmd = "nova flavor-show {0}".format(get_config("ironic", "flavor"))
+        result = self.cli.execute_cmd(cmd)
+        flavor = parser.details(result)
+        ironic_ram = flavor.get("ram")
+
         available_virt = None
         for virt_host in virtual_hosts:
             cmd = "openstack host show {0}".format(virt_host)
             result = self.cli.execute_cmd(cmd)
             projects = parser.listing(result)
+            total = 0
+            used = 0
             for project in projects:
-                if (project.get("Project") == "(total)"
-                        and project.get("Memory MB") > 254802):
-                    available_virt = virt_host
-                    break
-            if available_virt is not None:
+                if project.get("Project") == "(total)":
+                    total = project.get("Memory MB")
+                if project.get("Project") == "(used_now)":
+                    used = project.get("Memory MB")
+            available_ram = int(total) - int(used)
+            if available_ram >= ironic_ram:
+                available_virt = virt_host
                 break
 
         self.assertIsNotNone(
