@@ -65,7 +65,7 @@ class InstanceTests(BaseTest):
         self.assertEqual(server.get("status"), "REBOOT")
         server = self._wait_for_status(show_cmd, "status", "ACTIVE")
         self.assertEqual(server.get("status"), "ACTIVE")
-        result = self.cli.execute_w_retry(ssh_cmd, attempts=40, delay=30)
+        result = self.cli.execute_w_retry(ssh_cmd, attempts=25, delay=30)
         self.assertIn(user, result)
 
         # Delete instance and verify deletion
